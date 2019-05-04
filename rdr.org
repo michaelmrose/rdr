@@ -1,0 +1,73 @@
+* Purpose
+Port the books script written in fish to clojure where it can be turned into a jar with lein uberjar and ultimately AOT compiled with graal to a portable native application that will start up quicker than fish shell, be portable to machines that don't have fish installed and serve as a good work sample for modern labor. It will still require dmenu or rofi to select from available choices and of course Calibre in order to have a database to query.
+
+* Implementing
+** Basics
+The script will basically take a query intended to be formatted for calibredb which has a more verbose input format than the user would enter in the calibre gui and turn it into something slightly simpler and terser than they would enter in the gui search. Given a singular result it will simply open said book. Given multiple entries it will allow the user to select an option via dmenu or rofi and open that.
+** Output
+The result will be json if --for-machine is passed to calibredb which will be required to get easy to parse output.
+**  When calibre is running
+Its necessary to test if calibre is running and connect to that instance if it is. The required option for a local library, the only use case I intend to support, is --with-library=http://localhost:8080 given the default port.
+** options
+port, in case the user uses a non default port
+** opening
+given a number n
+gio open $ebook_library/*/*\(n\)*/*.format or just record the filename
+** performance
+one could checksum the database and save the results of the last n queries discarding on change. It takes about 15ms to checksum a library of 2K books and 2 ms to read a small file in the shell. This seems simple enough. One could imagine this being slower on spinning rust and increasingly slow as your library gets bigger. One could run a service and watch the file instead but this seems more complicated. It takes 1ms to get the size of the library and avoid running checksum if it would be detrimental to performance. Example md5sum on a 150MB file seems to take 600ms vs 900ms to query calibres library. One of course can check to see if the query is cached before bothering with any of the above. So some scenarios
+
+query isn't cached => we waste the time to check the list of cached queries then consume time to do the lookup. Around 900ms
+
+query is cached but it turns out the library has changed. This might be infrequent if the library is rarely modified. => we look up to find if the query is cached, we check the checksum, fail and do the query 925..950ms
+
+query is cached and checksum matches => we confirm the query is cached, that the checksum matches and print the results instead of doing the lookup. We consume 50ms
+
+I think that the 900ms that would be consumed in the default case is already noticeable and difficult to avoid. Adding a small amount to some cases to substantially decrease others seems like a reasonable trade off. One could imagine keeping track of common queries and warming up the cache after the checksum fails to match.
+* Usage
+** books -q  -c criteria:query 
+-q indicates a query -c indicates that what will follow is on of the criteria supported by calibre followed by a colon followed by the literal query. -c must come before the criteria:query because the title may include a literal colon. For example books -q -c title::foo would be a valid search for a book entitled :foo bar.
+
+In several cases it might be worthwhile to provide short or alternative forms. For example calibre expects tags plural for the case of a singular tag. Same with authors. In addition t could stand in for title tg for tags a for authors g for genre.  It might well be worthwhile to define a list of synonyms as well sci fi scifi science fiction spring to mind. Also although in many cases matching a substring makes a lot of sense people searching for fiction don't want non-fiction included in search results. Special cases suck but it is what it is. The criteria any should match any field.
+
+It should be considered unless otherwise specified that given multiple -c entries that there is an implicit and between queries. It should be possible to include an optional or or and not. Including the same criteria twice should form an implicit or. In theory grouping would be useful but seems overly complicated without good reason.  Calibre seems to group adjacent ands separated by ors.
+
+
+**** examples  
+books -q -c a:foo -c g:fiction                 =>   books -q -c a:foo and -c g:fiction
+books -q -c a:foo -c g:scifi or -c g:fantasy   =>   books -q -c a:foo and -c g:scifi or -c g:fantasy 
+books -q -c a:foo -c g:scifi -c g:fantasy      =>   books -q -c a:foo and -c g:scifi or -c g:fantasy
+books -q -c any:foo                            =>   books -q -c a:foo or t:foo or tag:foo or g:foo 
+=> calibredb list --fields id,title,formats -s title:foo or tags:foo or genre:foo --for-machine --with-library=http://localhost:8080
+
+one can imagine why nobody would want to type
+calibredb list --fields id,title,formats -s title:clojure --for-machine|jq '.[].formats[0]'|xargs gio open
+leaving aside recording recent reads, picking from a list wherein more than one result comes up, showing useful titles instead of filenames that include one file for each format the book exists in.
+
+
+
+** books -o filename
+opens file with the appropriate viewer while recording the title and filename in the list of the most recent n recent reads if and only if the file is part of the calibre library. This is so that it can be used as the default handler for opening ebooks without polluting the recent reads list with every pdf you ever open. Because when I want to read something I probably don't want to go over last years taxes.
+** books -l
+opens the latest entry in recent reads
+** books -r
+uses rofi/dmenu to select an entry from recent reads
+** books -c 
+uses sxiv to show books covers and allow user to graphically select books by cover. Requires user to install sxiv. Might not be worth implementing.
+** books  query
+Wherein argument to the function is neither a filename nor starts with some sort of option it should be considered that the user had entered -q -c any:query
+** other options
+-p or --preferred '[pdf epub mobi]' to decide which format to use if multiple exist
+-r or --reader app or map between filetypes and readers ex {:epub "ebook-viewer" :pdf "zathura"}
+-k or --keep n for the number of recent reads to keep 
+-L or --library for library path
+-S or --save to save the most recent choices for -p -r -k -L to ~/.config/booksclj/options.edn
+** books criteria:query
+This could be supported. However it would be impossible to distinguish between something intended to be interpreted as
+
+books -q -c title:foo
+
+and
+
+books -q -c a:title:foo or t:titlefoo or tag:title:foo or g:title:foo
+
+This would be accomplished by discovering if the text prior to the first colon matches a short list of proper criteria however users can actually define their own criteria plus this would seem to be annoyingly complex to simply avoid typing books -q -c title:foo plus honestly the most common arguments based on my own usage don't bother to provide any specifiers.  With 2000 books I find it easiest to just type the search term without specifier
