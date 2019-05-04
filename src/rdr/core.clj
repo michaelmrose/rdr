@@ -156,4 +156,3 @@
         ]
     (spit checksum-file checksum)
     (not= checksum oldsum)))
-(-main "-r")

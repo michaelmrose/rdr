@@ -11,5 +11,5 @@ run :
 build : graal
 release : graalenterprise
 java : uberjar
-	java -jar target/uberjar/rdr*SNAPSHOT-standalone.jar "authors:herbert"
+	java -jar target/uberjar/rdr*SNAPSHOT-standalone.jar -q "authors:herbert"
 
