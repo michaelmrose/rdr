@@ -10,6 +10,7 @@
    [pandect.algo.adler32 :refer :all]
    )
   (:gen-class))
+(set! *warn-on-reflection* true)
 
 (defn -main
   "I don't do a whole lot ... yet."
