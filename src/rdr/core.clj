@@ -8,11 +8,7 @@
    [me.raynes.fs :as fs]
    [clojure.data.json :as json]
    [pandect.algo.adler32 :refer :all]
+   [rdr.utils :as u]
    )
   (:gen-class))
 (set! *warn-on-reflection* true)
-
-(defn -main
-  "I don't do a whole lot ... yet."
-  [& args]
-  (println "Hello, World!"))
