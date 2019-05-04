@@ -7,6 +7,7 @@
   (:gen-class))
 
 (set! *warn-on-reflection* true)
+
 (defn seek
   "Returns first item from coll for which (pred item) returns true.
    Returns nil if no such item is present, or the not-found value if supplied."
