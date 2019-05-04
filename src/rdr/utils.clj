@@ -3,7 +3,8 @@
    [clojure.java.shell :as ex]
    [clojure.string :as string]
    [me.raynes.fs :as fs]
-   ))
+   )
+  (:gen-class))
 
 (set! *warn-on-reflection* true)
 (defn seek
