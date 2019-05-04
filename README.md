@@ -26,7 +26,11 @@ See rdr.org for coming development.
 
 ### Bugs
 
-Calibre returns incorrect results when you talk to the running process so this wont work with calibre running until this is fixed.
+Calibre returns incorrect results when you talk to the running process so this wont work with calibre running until this is fixed. Specifically in older versions of calibre calibredb would return fine with calibre running. Newish versions refuse to operate if calibre is running and require you to pass the server as an option to calibredb. The current calibre process handles queries from calibredb to ensure their is only one process talking to calibre. Right now it returns the text "Epub" instead of "/absolute/path/to/somebook.epub" for formats when you pass --with-library=http://localhost:8080
+
+This is true of at least 3.41.3 whereas 2.55 will gladly return without --with-library.  The desired behavior it would seem to me would be to return without issue for operations that don't require writing. I will create an issue on calibre's bug tracker and see what can be done.
+
+If the bug is fixed I can test for version before querying if required.
 ...
 
 
