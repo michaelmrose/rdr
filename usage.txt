@@ -1,0 +1,50 @@
+Usage:
+-q or --query [query]  => pass query to calibres library, if multiple items are returned
+                          resulting titles will be narrowed with rofi then the resulting
+                          choice will be opened with the preferred format and reader
+
+Query can consist of a simple string of text whereupon the program will search the library for books with matching strings in the tags,authors,title fields. Alternatively criteria can be specified explicitly with -q -c criteria:query. If so there is multiple criteria specified one can assume there is an and between criteria. And and or can also be explicitly be specified. In addition short forms of criteria can be specified. Example
+
+  t for title
+  tg or tag for tags
+  author or a for author
+
+values can be prefaced with = to avoid for example fiction matching non-fiction. Furthermore some values have implicit terms. Example scifi will match science fiction and fiction wont match non fiction. This is accomplished by substituting a single term for a more complex one. Example books -q -c tg:fiction could see tg:fiction expanded and  replaced with the result being equivalent to books -q -c tags:fiction and not tags:non-fiction and not tags:nonfiction.
+
+These synonyms for criteria and implicit terms can be specified in a configuration file so that you may add your own.
+
+-o or --open [file] => Opens file and saves to recent reads if within calibre library
+-l or --last        => Opens last read book
+-r or --recent      => use rofi to pick from recent reads
+-p or --preferred [comma separated list of formats in order of preference]
+
+Example: -p pdf,epub,mobi
+
+defaults to pdf,epub,mobi
+
+If a given book has multiple formats available the preferred format will be opened.
+A format that isn't listed implicitly comes after those that are.
+
+
+-R or --reader [comma separated list of commands] or map of formats to applications. If not specified prompt for values to be saved for later invocations.
+
+Example -R zathura,ebook-viewer
+        -R zathura
+        -R epub=ebook-viewer,pdf=zathura,else=ebook-viewer
+
+-L or --library [path] => the path to your calibre library, optional
+
+------------
+-k or --keep the number of recent reads to keep fifo, defaults to 30
+-S [options] arguments to -p -R -L -k to save as the default for future invocations
+
+-D epub,pdf,mobi sets books as the default handler of the listed types. defaults to pdf,epub,mobi
+
+
+The recommended path is to first run books -S with your desired options
+
+example: books -S -D -k 30 -R zathura -p pdf,epub,mobi
+
+then run books -q whatever you please
+
+If you make the included books desktop file the default handler for ebooks it will properly record your recent reads even if you open the file manually or with calibres gui interface.
