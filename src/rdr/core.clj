@@ -12,6 +12,15 @@
 
 (def help-text
   "Usage:
+  -q [query] => pass query with the same syntax as calibredb or calibregui accepts
+  -r         => filter the most recent 30 distinct books opened via rdr via rofi or dmenu
+  -l         => open the last book read
+  -o [file]  => open with zathura and record in recent reads if part of a calibre library
+
+  See proposed help text for a more complete cli to be implemented ")
+
+(def proposed-help-text
+  "Usage:
   -q or --query [query]  => pass query to calibres library, if multiple items are returned
                           resulting titles will be narrowed with rofi then the resulting
                           choice will be opened with the preferred format and reader
@@ -157,8 +166,3 @@
   ;; yet obviously we don't want to kill the repl every time we run test main
   (if-not (is-in-repl?) 
     (shutdown-agents)))
-
-;; (-main "-q" "tags:haskell")
-;; (-main "-l")
-;; (-main "-r")
-;; (-main "-h")
