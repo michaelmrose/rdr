@@ -95,7 +95,9 @@
 (defn open-ebook-file [file]
   (ex/sh (return-ebook-reader-command file) file)
   (if-let [book (calibre/filename-to-metadata file)]
-    (save-book-to-recent-reads book 30)))
+    (save-book-to-recent-reads book 30)
+    (ex/sh (return-ebook-reader-command file) file)
+    ))
 
 (defn print-book-details [book]
   (let [title (:title book)
@@ -155,3 +157,8 @@
   ;; yet obviously we don't want to kill the repl every time we run test main
   (if-not (is-in-repl?) 
     (shutdown-agents)))
+
+;; (-main "-q" "tags:haskell")
+;; (-main "-l")
+;; (-main "-r")
+;; (-main "-h")

@@ -5,6 +5,7 @@
    [me.raynes.fs :as fs]
    [clojure.data.json :as json]
    [rdr.utils :refer :all]
+   [swiss.arrows :refer :all]
    )
   (:gen-class))
 
@@ -13,6 +14,31 @@
 (defn get-library-path []
   (let [calibre-config (str (System/getenv "HOME") "/.config/calibre/global.py.json")]
     (str (get (json/read-str(slurp calibre-config)) "library_path") "/")))
+
+
+
+(defn id-to-formats [id]
+  "Given an id return formats vector containing paths to books matching id."
+  (->>(:out (ex/sh "sh" "-c" (str "ls " (get-library-path) "*/*\\(" id  "\\)/*")))
+      (string/split-lines)
+      ;;need to avoid listing cover files or calibre metadata which appears to be .opf
+      ;;I think any image files are always converted to jpg. Hopefully this is consistent.
+      ;; (remove #(re-matches #".+\.opf|.+\.jpg" %))
+      (remove #(re-matches #"(?:.+\.)(?:(?:jpg)|(?:opf))$" %))
+      (filter identity)
+      (into []))) 
+
+(defn fix-book-formats [book]
+  "Use id-to-formats to fix an ebook maps formats vectors which given a remote query will
+   contain the format type instead of the actual local path of the file required."
+  (assoc book :formats (id-to-formats (:id book))))
+
+(defn filename-to-id-string [f]
+  "Given a predictable path this will return the id of a book or nil if the book isn't in the calibre
+   libraries path."
+  (let [book-in-library-pattern (re-pattern (str (get-library-path) ".+/.+\\(([0-9]+)\\)/.+.{1,9}$"))]
+    (if-let [id (second(re-matches book-in-library-pattern f))]
+      id)))
 
 (defn calibre-running? []
   (pgrep "GUIPool|calibre" ))
@@ -39,14 +65,17 @@
   "Uses format-calibredb-query to format query, collects and processes json results
    and returns a vector of maps"
   [query]
-  (-> (:out (apply ex/sh (format-calibredb-query query)))
-      (json/read-str :key-fn keyword)))
+  (-<> (:out (apply ex/sh (format-calibredb-query query)))
+       (json/read-str :key-fn keyword)
+       (mapv fix-book-formats <>)
+       ))
 
 (defn list-all-books []
   (query-string-to-vector-of-maps "*"))
 
-(defn filename-to-metadata [file]
-  (first(filter (fn [m](vector-contains? (:formats m) file) ) (list-all-books))))
+(defn filename-to-metadata [f]
+  (let [id (filename-to-id-string f)]
+    (query-string-to-vector-of-maps (str "id:" id))))
 
 (defn select-preferred-ebook-format [book preferred-formats]
   "Given a book map and a vector of preferred formats in order of preference
@@ -58,16 +87,17 @@
             ]
     desired
     (first (:formats book))))
-;;ls /home/michael/books/*/*\(2602\)/*
-;; (defn id-to-real-path-to-formats [id]
-;;   (:out (ex/sh "bash" "-c" (str (get-library-path) "*/*(" id ")/*") ))) 
 
 
-(defn id-to-formats [id]
-  (->>(:out (ex/sh "sh" "-c" (str "ls " (get-library-path) "*/*\\(" id  "\\)/*")))
-      (string/split-lines)
-      (map #(re-find #".*pdf$|.*epub$" %))
-      (filter identity)
-      (into []))) 
+;; Calibre wont allow local reading of the library metadata when gui app is open for_machine
+;; reasons of consistency thus you must communicate with the process over an interface that
+;; is also used for remote communications. Over this interface you can't get the true path
+;; to formats for proposed reasons of security.  To work around this shell munging is used.
 
-(id-to-formats 3)
+;; This may seem fragile however calibre is commited to a consistent file system structure
+;; /library-root/authors/title (id)/files and approach was suggested by calibre dev.
+;; This is to say that given an ebooks id will always be inside parens before the last / in
+;; the the files path and all files will be after the final /.  Each dir will contain in
+;; addition to the ebooks an image file for the cover which will always be a jpg and a
+;; metadata file ending in opf. These must be filtered out.
+
