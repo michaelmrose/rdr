@@ -23,6 +23,34 @@ query is cached but it turns out the library has changed. This might be infreque
 query is cached and checksum matches => we confirm the query is cached, that the checksum matches and print the results instead of doing the lookup. We consume 50ms
 
 I think that the 900ms that would be consumed in the default case is already noticeable and difficult to avoid. Adding a small amount to some cases to substantially decrease others seems like a reasonable trade off. One could imagine keeping track of common queries and warming up the cache after the checksum fails to match.
+** querying the database instead of relying on calibredb
+The issue calibredb wont query the database when its in use by the gui calibre app. It requires you to talk to the process and for security reasons wont return absolute paths to files. I tried raising an issue on their tracker but they are disinclined to add an option for such.
+
+So I'm looking at querying metadata.db manually.
+
+An example query
+
+combine library path
+ex: /home/michael/books/
+
+books.path data.name data.format join on data.book = books.id
+
+example 
+select books.path, data.name, data.format
+from books
+inner join data on data.book = books.id
+wherhttps://clojuredocs.org/clojure.java.shell/she books.id = 1
+
+/home/michael/books/Obie Fernandez/The Rails 4 Way (1)/The Rails 4 Way - Obie Fernandez.pdf
+
+select books.path, data.name, data.format
+from books
+inner join data on data.book = books.id
+where books.title like "%clojure%" and books.title like "%action%"
+
+/home/michael/Amit Rathore/Clojure in Action (3)/Clojure in Action - Amit Rathore.pdf
+/home/michael/Amit Rathore/Clojure in Action (3)/Clojure in Action - Amit Rathore.epub
+
 * Usage
 ** books -q  -c criteria:query 
 -q indicates a query -c indicates that what will follow is on of the criteria supported by calibre followed by a colon followed by the literal query. -c must come before the criteria:query because the title may include a literal colon. For example books -q -c title::foo would be a valid search for a book entitled :foo bar.

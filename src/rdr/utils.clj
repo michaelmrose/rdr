@@ -3,6 +3,8 @@
    [clojure.java.shell :as ex]
    [clojure.string :as string]
    [me.raynes.fs :as fs]
+   [clojure.data.json :as json]
+   [pandect.algo.adler32 :refer :all]
    )
   (:gen-class))
 
@@ -55,8 +57,7 @@
     (fs/mkdir path)))
 
 (defn ensure-file-exists [path]
-  (if-not (fs/exists? path)
-    (fs/touch path)))
+  (if-not (fs/exists? path) (fs/touch path)))
 
 (defn get-configuration-file-path [name]
   (let [config-dir  (str (System/getenv "HOME") "/.config/booksclj/")
@@ -98,3 +99,7 @@
   "Runs .contains on a clojure.lang.Persistentvector annotating it to avoid a reflection warning"
   [^clojure.lang.PersistentVector v value]
   (.contains v value))
+
+(defn checksum-file [path]
+  (adler32-file path))
+
