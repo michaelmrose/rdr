@@ -5,6 +5,8 @@
    [clojure.data.json :as json]
    [rdr.utils :refer :all]
    [rdr.calibre :as calibre]
+   [me.raynes.fs :as fs]
+   [clojure.java.io :as io]
    )
   (:gen-class))
 
@@ -78,7 +80,6 @@
    determine what reader command to use. map could be passed quoted at cli or a single application name
    passed with -r ex: -r zathura or -r '{epub somereader pdf zathura else foobar}'This could ultimately be part of a configuration file"
   [book]
-  "zathura"
   )
 
 (defn save-book-to-recent-reads 
@@ -92,13 +93,15 @@
   (println "saving to recent list")
   )
 
-
+;;TODO this opens the file with xdg-open open rather than depending on an expressed preference in reader
+;; This means it can't be set as the default handler else you would see an infinite series of invocations instead of
+;; the app opening the book in the desired reader until this is corrected
 (defn open-ebook 
-  "If books path is within the calibre library path pass book to save-book-to-recent-reads
+  "Pass book to save-book-to-recent-reads
    then open the most preferred format with the preferred reader defined by -p and -r or configuration"
   [book & options]
-  (save-book-to-recent-reads book 30)
-  (ex/sh (return-ebook-reader-command book) (calibre/select-preferred-ebook-format book [".pdf" ".epub"] ))
+  (future(save-book-to-recent-reads book 30))
+  (future(ex/sh (return-ebook-reader-command book) (calibre/select-preferred-ebook-format book [".pdf" ".epub"])))
   )
 
 (defn open-ebook-file [file]
