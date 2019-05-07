@@ -16,6 +16,18 @@
     (str (get (json/read-str(slurp calibre-config)) "library_path") "/")))
 
 
+;; Calibre wont allow local reading of the library metadata when gui app is open for_machine
+;; reasons of consistency thus you must communicate with the process over an interface that
+;; is also used for remote communications. Over this interface you can't get the true path
+;; to formats for proposed reasons of security.  To work around this shell munging is used.
+
+;; This may seem fragile however calibre is commited to a consistent file system structure
+;; /library-root/authors/title (id)/files and approach was suggested by calibre dev.
+;; This is to say that given an ebooks id will always be inside parens before the last / in
+;; the the files path and all files will be after the final /.  Each dir will contain in
+;; addition to the ebooks an image file for the cover which will always be a jpg and a
+;; metadata file ending in opf. These must be filtered out.
+
 
 (defn id-to-formats [id]
   "Given an id return formats vector containing paths to books matching id."
@@ -88,16 +100,4 @@
     desired
     (first (:formats book))))
 
-
-;; Calibre wont allow local reading of the library metadata when gui app is open for_machine
-;; reasons of consistency thus you must communicate with the process over an interface that
-;; is also used for remote communications. Over this interface you can't get the true path
-;; to formats for proposed reasons of security.  To work around this shell munging is used.
-
-;; This may seem fragile however calibre is commited to a consistent file system structure
-;; /library-root/authors/title (id)/files and approach was suggested by calibre dev.
-;; This is to say that given an ebooks id will always be inside parens before the last / in
-;; the the files path and all files will be after the final /.  Each dir will contain in
-;; addition to the ebooks an image file for the cover which will always be a jpg and a
-;; metadata file ending in opf. These must be filtered out.
 
