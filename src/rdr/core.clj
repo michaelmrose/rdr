@@ -111,11 +111,9 @@
     (open-ebook book)
     (ex/sh (return-ebook-reader-command file) file)
     ))
-
-(defn print-book-details [book]
-  (let [title (:title book)
-        authors (:authors book)]
-    (str title " by " authors)))
+(defn print-book-details [book] (let [title (:title book)
+                                      authors (:authors book)]
+                                  (str title " by " authors)))
 
 (defn select-from-books-by-title-and-open [books]
   (if-let* [^clojure.lang.PersistentVector titles (mapv print-book-details books)
