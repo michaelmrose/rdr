@@ -107,9 +107,8 @@
   )
 
 (defn open-ebook-file [file]
-  (ex/sh (return-ebook-reader-command file) file)
   (if-let [book (calibre/filename-to-metadata file)]
-    (save-book-to-recent-reads book 30)
+    (open-ebook book)
     (ex/sh (return-ebook-reader-command file) file)
     ))
 
