@@ -60,7 +60,7 @@
   (if-not (fs/exists? path) (fs/touch path)))
 
 (defn get-configuration-file-path [name]
-  (let [config-dir  (str (System/getenv "HOME") "/.config/booksclj/")
+  (let [config-dir  (str (System/getenv "HOME") "/.config/rdr/")
         config-file (str config-dir name)]
     (ensure-directory-exists config-dir)
     (ensure-file-exists config-file)
