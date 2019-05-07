@@ -149,7 +149,7 @@
   (select-from-books-by-title-and-open (list-recent-reads)))
 
 (defn print-help "Print help info" []
-  (println (slurp "usage.txt")))
+  (println help-text))
 
 (defn query-and-open [query]
   (select-from-books-by-title-and-open (calibre/query-string-to-vector-of-maps query) ))
