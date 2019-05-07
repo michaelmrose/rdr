@@ -86,8 +86,8 @@
   (query-string-to-vector-of-maps "*"))
 
 (defn filename-to-metadata [f]
-  (let [id (filename-to-id-string f)]
-    (query-string-to-vector-of-maps (str "id:" id))))
+  (let [id (filename-to-id-string (.getPath ^java.io.File (fs/absolute f)))]
+    (first(query-string-to-vector-of-maps (str "id:" id)))))
 
 (defn select-preferred-ebook-format [book preferred-formats]
   "Given a book map and a vector of preferred formats in order of preference
