@@ -80,6 +80,8 @@
    determine what reader command to use. map could be passed quoted at cli or a single application name
    passed with -r ex: -r zathura or -r '{epub somereader pdf zathura else foobar}'This could ultimately be part of a configuration file"
   [book]
+  ;; "zathura"
+  "xdg-open"
   )
 
 (defn save-book-to-recent-reads 
