@@ -1,5 +1,5 @@
 clean :
-	rm -f target/uberjar/*.jar rdr-*-standalone
+	rm -f target/uberjar/*.jar rdr-*-standalone rdr.tar.gz
 install :
 	cp rdr-*-standalone ~/bin/rdr
 zip :
