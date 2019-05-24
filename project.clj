@@ -9,6 +9,7 @@
                  [org.clojure/data.json "0.2.6"]
                  [pandect "0.5.0"]
                  [me.raynes/fs "1.4.6"]
+                 [org.clojure/tools.cli "0.4.2"]
                  ]
   :main rdr.core
   :target-path "target/%s"
