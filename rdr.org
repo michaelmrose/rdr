@@ -72,6 +72,85 @@ calibredb list --fields id,title,formats -s title:clojure --for-machine|jq '.[].
 leaving aside recording recent reads, picking from a list wherein more than one result comes up, showing useful titles instead of filenames that include one file for each format the book exists in.
 
 
+****  Sample query and results
+
+shell query:
+
+calibredb list --fields title,authors,formats -s '(authors:herbert or title:herbert) and (authors:dune or title:dune)' --for-machine|clipboard
+
+expected query
+
+rdr herbert dune
+
+We basically are searching 
+
+
+#+BEGIN_SRC js
+[
+  {
+    "authors": "Frank Herbert", 
+    "formats": [
+      "/home/michael/books/Frank Herbert/1966-Dune (1280)/1966-Dune - Frank Herbert.epub"
+    ], 
+    "id": 1280, 
+    "title": "1966-Dune"
+  }, 
+  {
+    "authors": "Frank Herbert", 
+    "formats": [
+      "/home/michael/books/Frank Herbert/ChapterHouse_ Dune (dc-6) (1282)/ChapterHouse_ Dune (dc-6) - Frank Herbert.epub"
+    ], 
+    "id": 1282, 
+    "title": "ChapterHouse: Dune (dc-6)"
+  }, 
+  {
+    "authors": "Frank Herbert", 
+    "formats": [
+      "/home/michael/books/Frank Herbert/Children of Dune (dc-3) (1283)/Children of Dune (dc-3) - Frank Herbert.epub"
+    ], 
+    "id": 1283, 
+    "title": "Children of Dune (dc-3)"
+  }, 
+  {
+    "authors": "Frank Herbert", 
+    "formats": [
+      "/home/michael/books/Frank Herbert/Dune (1286)/Dune - Frank Herbert.epub", 
+      "/home/michael/books/Frank Herbert/Dune (1286)/Dune - Frank Herbert.pdf"
+    ], 
+    "id": 1286, 
+    "title": "Dune"
+  }, 
+  {
+    "authors": "Frank Herbert", 
+    "formats": [
+      "/home/michael/books/Frank Herbert/Dune Messiah (d-2) (1287)/Dune Messiah (d-2) - Frank Herbert.epub"
+    ], 
+    "id": 1287, 
+    "title": "Dune Messiah (d-2)"
+  }, 
+  {
+    "authors": "Frank Herbert", 
+    "formats": [
+      "/home/michael/books/Frank Herbert/God Emperor of Dune (dc-4) (1288)/God Emperor of Dune (dc-4) - Frank Herbert.epub"
+    ], 
+    "id": 1288, 
+    "title": "God Emperor of Dune (dc-4)"
+  }, 
+  {
+    "authors": "Frank Herbert", 
+    "formats": [
+      "/home/michael/books/Frank Herbert/Heretics of Dune (dc-5) (1289)/Heretics of Dune (dc-5) - Frank Herbert.epub"
+    ], 
+    "id": 1289, 
+    "title": "Heretics of Dune (dc-5)"
+  }
+]
+#+END_SRC
+
+This doesn't work with 3 or more criteria or more generally when one of the included criteria are given no search terms. If instead we always use or we can trivially filter for entries that have all search terms
+
+This doesn't work with 3 or more criteria or more generally when one of the included criteria are given no search terms. If instead we always use or we can trivially filter for entries that have all search terms
+
 
 ** books -o filename
 opens file with the appropriate viewer while recording the title and filename in the list of the most recent n recent reads if and only if the file is part of the calibre library. This is so that it can be used as the default handler for opening ebooks without polluting the recent reads list with every pdf you ever open. Because when I want to read something I probably don't want to go over last years taxes.
@@ -99,3 +178,4 @@ and
 books -q -c a:title:foo or t:titlefoo or tag:title:foo or g:title:foo
 
 This would be accomplished by discovering if the text prior to the first colon matches a short list of proper criteria however users can actually define their own criteria plus this would seem to be annoyingly complex to simply avoid typing books -q -c title:foo plus honestly the most common arguments based on my own usage don't bother to provide any specifiers.  With 2000 books I find it easiest to just type the search term without specifier
+
