@@ -118,13 +118,13 @@
                                       authors (:authors book)]
                                   (str title " by " authors)))
 
-(defn select-from-books-by-title-and-open [books]
+(defn select-from-books-by-title [books]
   (if-let* [^clojure.lang.PersistentVector titles (mapv print-book-details books)
             choice (rofi-select titles)
             ndx (.indexOf titles choice)
             book (nth books ndx) 
             ]
-    (open-ebook book)))
+    book))
 
 
 
@@ -141,7 +141,7 @@
 (defn pick-from-recent-reads 
   "Read recent reads and use pick-from-selection to open"
   []
-  (select-from-books-by-title-and-open (list-recent-reads)))
+  (open-ebook (select-from-books-by-title (list-recent-reads))))
 
 (defn print-help "Print help info" []
   (println help-text))
@@ -193,7 +193,7 @@
 
 ;; (-main "-l" "-p" ".pdf,.epub"  "clojure" "action")
 ;; (-main "-r" "-p" ".pdf,.epub"  "clojure" "action")
-;; (-main "-p" ".pdf,.epub" "-q" "clojure" "action")
+(-main "-p" ".pdf,.epub" "-q" "clojure")
 ;; (-main "-k" "20" "-o" "halo.pdf")
-(-main "-S" "-k" "32" "-p" ".pdf,.epub")
+;; (-main "-S" "-k" "32" "-p" ".pdf,.epub")
 
