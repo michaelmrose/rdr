@@ -15,7 +15,6 @@
   (let [calibre-config (str (System/getenv "HOME") "/.config/calibre/global.py.json")]
     (str (get (json/read-str(slurp calibre-config)) "library_path") "/")))
 
-
 ;; Calibre wont allow local reading of the library metadata when gui app is open for_machine
 ;; reasons of consistency thus you must communicate with the process over an interface that
 ;; is also used for remote communications. Over this interface you can't get the true path
@@ -99,5 +98,3 @@
             ]
     desired
     (first (:formats book))))
-
-

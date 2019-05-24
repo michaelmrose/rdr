@@ -7,10 +7,14 @@
    [rdr.calibre :as calibre]
    [me.raynes.fs :as fs]
    [clojure.java.io :as io]
+   [clojure.tools.cli :as cli]
    )
   (:gen-class))
 
 (set! *warn-on-reflection* true)
+
+(declare opts)
+
 
 (def help-text
   "Usage:
@@ -55,7 +59,6 @@
   Example -R zathura,ebook-viewer
         -R zathura
         -R epub=ebook-viewer,pdf=zathura,else=ebook-viewer
-
   -L or --library [path] => the path to your calibre library, optional
 
   ------------
@@ -80,20 +83,20 @@
    determine what reader command to use. map could be passed quoted at cli or a single application name
    passed with -r ex: -r zathura or -r '{epub somereader pdf zathura else foobar}'This could ultimately be part of a configuration file"
   [book]
-  ;; "zathura"
+  (let [ext (fs/extension (calibre/select-preferred-ebook-format book (:preferred opts)))])
   "xdg-open"
   )
+
+(return-ebook-reader-command {:authors "Amit Rathore", :formats ["/home/michael/books/Amit Rathore/Clojure in Action (3)/Clojure in Action - Amit Rathore.epub" "/home/michael/books/Amit Rathore/Clojure in Action (3)/Clojure in Action - Amit Rathore.pdf"], :id 3, :title "Clojure in Action"} )
 
 (defn save-book-to-recent-reads 
   "saves book info map to ~/.config/booksclj/recent.edn keeping only the most recent n entries 
    where n is either 30 or the value defined by --keep"
-  [book n]
+  [book]
   (let [recent (get-configuration-file-path "recent")
         current (string/split-lines(slurp recent))
-        combined (string/join "\n"(take n (distinct(flatten [(str book) current]))))]
-    (spit recent combined))
-  (println "saving to recent list")
-  )
+        combined (string/join "\n"(take (:number opts) (distinct(flatten [(str book) current]))))]
+    (spit recent combined)) (println "saving to recent list"))
 
 ;;TODO this opens the file with xdg-open open rather than depending on an expressed preference in reader
 ;; This means it can't be set as the default handler else you would see an infinite series of invocations instead of
@@ -101,9 +104,9 @@
 (defn open-ebook 
   "Pass book to save-book-to-recent-reads
    then open the most preferred format with the preferred reader defined by -p and -r or configuration"
-  [book & options]
-  (future(save-book-to-recent-reads book 30))
-  (future(ex/sh (return-ebook-reader-command book) (calibre/select-preferred-ebook-format book [".pdf" ".epub"])))
+  [book]
+  (future(save-book-to-recent-reads book))
+  (future(ex/sh (return-ebook-reader-command book) (calibre/select-preferred-ebook-format book (:preferred opts))))
   )
 
 (defn open-ebook-file [file]
@@ -123,11 +126,6 @@
             ]
     (open-ebook book)))
 
-(defn save-configuration 
-  "save options like keep library path and desired reader to a configuation file so that they
-   may be omitted in the future."
-  [options]
-  )
 
 
 (defn list-recent-reads []
@@ -149,22 +147,50 @@
   (println help-text))
 
 (defn query-and-open [query]
-  (select-from-books-by-title-and-open (calibre/query-string-to-vector-of-maps query) ))
+  (select-from-books-by-title-and-open (calibre/query-string-to-vector-of-maps query)))
+
+(def cli-options
+  [["-h" "--help"]
+   ["-l" "--last"]
+   ["-r" "--recent"]
+   ["-q" "--query"]
+   ["-o" "--open"]
+   ["-k" "--keep NUMBER"]
+   ["-p" "--preferred FORMATS"
+    :parse-fn #(string/split % #",")]
+   ["-S" "--save"]
+   ["-R" "--reader"]])
+
+(def default-options
+  {:keep 30
+   :preferred [".epub" ".pdf"]}
+  )
+
+--reader .pdf=zathura
 
 (defn -main
   "Parse arguments and decide what action to take."
   [& args]
-  (let [op (first args)
-        payload (string/join " " (rest args))]
-    (condp = op
-      "-q" (query-and-open payload)
-      "-r" (pick-from-recent-reads)
-      "-l" (open-last-book)
-      "-o" (open-ebook-file payload)
-      "-h" (print-help)
-      ))
+  (def parsed (cli/parse-opts args cli-options))
+  (def opts (merge default-options (get-saved-configuration)(:options parsed)))
+  (def arguments (string/join " " (:arguments parsed)))
+
+  (cond
+    (:help opts) (print-help)
+    (:save opts) (save-configuration opts)
+    (:recent opts) (pick-from-recent-reads)
+    (:last opts) (open-last-book)
+    (:open opts) (open-ebook-file arguments)
+    (:query opts) (query-and-open arguments))
 
   ;; process takes several seconds to properly terminate if we don't exit manually
   ;; yet obviously we don't want to kill the repl every time we run test main
   (if-not (is-in-repl?) 
     (shutdown-agents)))
+
+;; (-main "-l" "-p" ".pdf,.epub"  "clojure" "action")
+;; (-main "-r" "-p" ".pdf,.epub"  "clojure" "action")
+;; (-main "-p" ".pdf,.epub" "-q" "clojure" "action")
+;; (-main "-k" "20" "-o" "halo.pdf")
+(-main "-S" "-k" "32" "-p" ".pdf,.epub")
+
