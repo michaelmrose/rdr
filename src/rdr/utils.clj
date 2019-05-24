@@ -103,3 +103,16 @@
 (defn checksum-file [path]
   (adler32-file path))
 
+
+(defn save-configuration 
+  "Save options like keep library path and desired reader to a configuation file so that they
+   may be omitted in the future. Obviously the save key shouldnt itself be saved."
+  [options]
+  (spit (get-configuration-file-path "settings") (select-keys options [:keep :preferred])))
+(save-configuration {:fuck "you" :save true})
+(defn get-saved-configuration []
+  "If saved settings don't exist return an empty map."
+  (let [contents (slurp (get-configuration-file-path "settings"))]
+    (if (not (empty? contents))
+      (read-string contents)
+      {})))
