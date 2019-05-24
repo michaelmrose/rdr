@@ -147,7 +147,10 @@
   (println help-text))
 
 (defn query-and-open [query]
-  (select-from-books-by-title-and-open (calibre/query-string-to-vector-of-maps query)))
+  (-> query
+      calibre/query-string-to-vector-of-maps
+      select-from-books-by-title
+      open-ebook))
 
 (def cli-options
   [["-h" "--help"]
