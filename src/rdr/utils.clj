@@ -3,7 +3,6 @@
    [clojure.java.shell :as ex]
    [clojure.string :as string]
    [me.raynes.fs :as fs]
-   [clojure.data.json :as json]
    [pandect.algo.adler32 :refer :all]
    )
   (:gen-class))
