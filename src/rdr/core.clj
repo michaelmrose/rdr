@@ -2,11 +2,8 @@
   (:require
    [clojure.java.shell :as ex]
    [clojure.string :as string]
-   [clojure.data.json :as json]
    [rdr.utils :refer :all]
    [rdr.calibre :as calibre]
-   [me.raynes.fs :as fs]
-   [clojure.java.io :as io]
    [clojure.tools.cli :as cli]
    )
   (:gen-class))
