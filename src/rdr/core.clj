@@ -25,7 +25,6 @@
   -r            => filter the most recent 30 distinct books opened via rdr via rofi or dmenu
   -l            => open the last book read
   -o [file]     => open with default reader and record in recent reads if part of a calibre library
-  afile.pdf     => same as -o afile.pdf
   a query here  => same as -q a query here")
 
 (def proposed-help-text
