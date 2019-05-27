@@ -93,10 +93,11 @@
   "saves book info map to ~/.config/booksclj/recent.edn keeping only the most recent n entries 
    where n is either 30 or the value defined by --keep"
   [book]
-  (let [recent (get-configuration-file-path "recent")
-        current (string/split-lines(slurp recent))
-        combined (string/join "\n"(take (:keep opts) (distinct(flatten [(str book) current]))))]
-    (spit recent combined)) (println "saving to recent list"))
+  (if-let* [recent (get-configuration-file-path "recent")
+            current (string/split-lines(slurp recent))
+            combined (string/join "\n"(take (:keep opts) (distinct(flatten [(str book) current]))))]
+    (spit recent combined)
+    (println "saving to recent list")))
 
 ;;TODO this opens the file with xdg-open open rather than depending on an expressed preference in reader
 ;; This means it can't be set as the default handler else you would see an infinite series of invocations instead of
@@ -122,8 +123,7 @@
   (if-let* [^clojure.lang.PersistentVector titles (mapv print-book-details books)
             choice (rofi-select titles)
             ndx (.indexOf titles choice)
-            book (nth books ndx) 
-            ]
+            book (nth books ndx)]
     book))
 
 
@@ -140,16 +140,17 @@
 (defn pick-from-recent-reads 
   "Read recent reads and use pick-from-selection to open"
   []
-  (open-ebook (select-from-books-by-title (list-recent-reads))))
+  (if-let* [recent (list-recent-reads)
+            sel (select-from-books-by-title recent)]
+    (open-ebook sel)))
 
 (defn print-help "Print help info" []
   (println help-text))
 
 (defn query-and-open [query]
-  (-> query
-      calibre/query-string-to-vector-of-maps
-      select-from-books-by-title
-      open-ebook))
+  (if-let* [res (calibre/query-string-to-vector-of-maps query)
+            sel (select-from-books-by-title res)]
+    (open-ebook sel)))
 
 (def cli-options
   [["-h" "--help"]
@@ -186,10 +187,8 @@
     (:last opts) (open-last-book)
     (:open opts) (open-ebook-file arguments)
     (:query opts) (query-and-open arguments)
-    :else (if (fs/exists? arguments) 
-            (open-ebook-file arguments)
-            (query-and-open arguments)
-            ))
+    :else (query-and-open arguments)
+    )
 
   ;; process takes several seconds to properly terminate if we don't exit manually
   ;; yet obviously we don't want to kill the repl every time we run test main
