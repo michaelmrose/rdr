@@ -90,9 +90,12 @@
    where n is either 30 or the value defined by --keep"
   [book]
   (if-let* [recent (get-configuration-file-path "recent")
-            current (string/split-lines (slurp recent))
-            combined (string/join "\n" (take (:keep opts) (distinct (flatten [(str book) current]))))]
-    (spit recent combined)
+            ;; current (string/split-lines (slurp recent))
+            current (map read-string (string/split-lines(slurp recent)))
+            combined (take (:keep opts) (distinct-by :id  (flatten [book current])))
+            ;; combined (string/join "\n" (take (:keep opts) (distinct (flatten [(str book) current]))))
+            ]
+    (spit recent (string/join "\n" combined))
     (println "saving to recent list")))
 
 ;;TODO this opens the file with xdg-open open rather than depending on an expressed preference in reader
@@ -186,3 +189,4 @@
 
   (if-not (is-in-repl?)
     (shutdown-agents)))
+(-main "-q" "scala" "in" "action")
