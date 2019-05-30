@@ -6,8 +6,7 @@
    [rdr.calibre :as calibre]
    [clojure.tools.cli :as cli])
   (:gen-class)
-  (:refer-clojure)
-  )
+  (:refer-clojure))
 
 (set! *warn-on-reflection* true)
 
@@ -90,10 +89,10 @@
    where n is either 30 or the value defined by --keep"
   [book]
   (if-let* [recent-config-file (get-configuration-file-path "recent")
-            current (map read-string (string/split-lines(slurp recent-config-file)))
+            current (map read-string (string/split-lines (slurp recent-config-file)))
             combined (take (:keep opts) (distinct-by :id  (flatten [book current])))]
-    (spit recent-config-file (string/join "\n" combined))
-    (println "saving to recent list")))
+           (spit recent-config-file (string/join "\n" combined))
+           (println "saving to recent list")))
 
 ;;TODO this opens the file with xdg-open open rather than depending on an expressed preference in reader
 ;; This means it can't be set as the default handler else you would see an infinite series of invocations instead of
@@ -118,7 +117,7 @@
             choice (rofi-select titles)
             ndx (.indexOf titles choice)
             book (nth books ndx)]
-    book))
+           book))
 
 (defn list-recent-reads []
   (let [recent (get-configuration-file-path "recent")]
@@ -134,17 +133,14 @@
   []
   (if-let* [recent (list-recent-reads)
             sel (select-from-books-by-title recent)]
-    (open-ebook sel)))
+           (open-ebook sel)))
 
 (defn print-help "Print help info" []
   (println help-text))
 
 (defn query-and-open [query]
   (if-let* [res (calibre/query-string-to-vector-of-maps query) sel (select-from-books-by-title res)]
-    (open-ebook sel)))
-
-(defn print-results-of-query [query]
-  (map println (calibre/query-string-to-vector-of-maps query)))
+           (open-ebook sel)))
 
 (def cli-options
   [["-h" "--help"]
@@ -158,7 +154,7 @@
    ["-P" "--print"]
    ["-S" "--save"] ;; TODO: Impliment this properly ;; ["-R" "--reader DEFAULTS"
    ;;  :parse-fn read-string ]
-   ])
+])
 
 (def default-options
   {:keep 30
@@ -180,7 +176,8 @@
       (:last opts) (open-last-book)
       (:open opts) (open-ebook-file arguments)
       (:query opts) (query-and-open arguments)
-      (:print opts) (print-results-of-query arguments)
+      (:print opts)  (doall (map println (map #(str (:title %) " by " (:authors %))
+                                              (calibre/query-string-to-vector-of-maps arguments))))
       :else (query-and-open arguments)))
 
   ;; process takes several seconds to properly terminate if we don't exit manually
