@@ -143,6 +143,9 @@
   (if-let* [res (calibre/query-string-to-vector-of-maps query) sel (select-from-books-by-title res)]
     (open-ebook sel)))
 
+(defn print-results-of-query [query]
+  (map println (calibre/query-string-to-vector-of-maps query)))
+
 (def cli-options
   [["-h" "--help"]
    ["-l" "--last"]
@@ -152,9 +155,8 @@
    ["-k" "--keep NUMBER"]
    ["-p" "--preferred FORMATS"
     :parse-fn #(string/split % #",")]
-   ["-S" "--save"]
-   ;; TODO: Impliment this properly
-   ;; ["-R" "--reader DEFAULTS"
+   ["-P" "--print"]
+   ["-S" "--save"] ;; TODO: Impliment this properly ;; ["-R" "--reader DEFAULTS"
    ;;  :parse-fn read-string ]
    ])
 
@@ -178,6 +180,7 @@
       (:last opts) (open-last-book)
       (:open opts) (open-ebook-file arguments)
       (:query opts) (query-and-open arguments)
+      (:print opts) (print-results-of-query arguments)
       :else (query-and-open arguments)))
 
   ;; process takes several seconds to properly terminate if we don't exit manually
@@ -186,4 +189,3 @@
 
   (if-not (is-in-repl?)
     (shutdown-agents)))
-(-main "-q" "scala" "in" "action")
