@@ -57,12 +57,11 @@
 (defn db-changed-since-last-visit? []
   (let [db (str (get-library-path) "metadata.db")
         checksum (checksum-file db)
-        checksum-file (get-configuration-file-path "checksum")
+        checksum-file (get-configuration-file-path (str "checksum" (string/replace (string/replace db "/" "-") ".db" ".sum")))
         oldsum (slurp checksum-file)
         ]
     (spit checksum-file checksum)
     (not= checksum oldsum)))
-
 
 (defn return-remote-library-segment []
   (if (calibre-running?) "--with-library=http://localhost:8080" ""))
