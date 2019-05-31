@@ -143,4 +143,3 @@
 
   (if-not (is-in-repl?)
     (shutdown-agents)))
-(-main "-r")
