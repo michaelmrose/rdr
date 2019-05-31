@@ -50,8 +50,11 @@
   "Pass book to save-book-to-recent-reads
    then open the most preferred format with the preferred reader defined by -p and -r or configuration"
   [book]
-  (future (save-book-to-recent-reads book))
-  (future (ex/sh (return-ebook-reader-command book) (calibre/select-preferred-ebook-format book (:preferred opts)))))
+  (let [fixed (calibre/correct-ebook-metadata-if-database-changed book)
+        command (return-ebook-reader-command fixed)
+        preferred (calibre/select-preferred-ebook-format fixed (:preferred opts))]
+    (future (save-book-to-recent-reads fixed))
+    (future (ex/sh command preferred))))
 
 (defn open-ebook-file [file]
   (if-let [book (calibre/filename-to-metadata file)]
@@ -60,7 +63,6 @@
 (defn print-book-details [book] (let [title (:title book)
                                       authors (:authors book)]
                                   (str title " by " authors)))
-
 (defn select-from-books-by-title [books]
   (if-let* [^clojure.lang.PersistentVector titles (mapv print-book-details books)
             choice (rofi-select titles)
