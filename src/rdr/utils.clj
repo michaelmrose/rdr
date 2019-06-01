@@ -3,8 +3,7 @@
    [clojure.java.shell :as ex]
    [clojure.string :as string]
    [me.raynes.fs :as fs]
-   [pandect.algo.adler32 :refer :all]
-   )
+   [pandect.algo.adler32 :refer :all])
   (:gen-class))
 
 (set! *warn-on-reflection* true)
@@ -28,7 +27,7 @@
 ;;TODO make passing in the desired app a thing
 
 (defn binary-exists? [name]
-  (= 0(:exit (ex/sh "which" name))))
+  (= 0 (:exit (ex/sh "which" name))))
 
 (defn invoke-rofi-or-dmenu [in]
   (cond
@@ -43,13 +42,13 @@
     (cond
       (= c 0) nil
       (= c 1) (first strings)
-      :else (->>(string/join "\n" strings)
-                (ex/sh "echo" "-e")
-                :out
-                (invoke-rofi-or-dmenu)
-                :out
-                (string/trim-newline)
-                (if-empty-then-nil)))))
+      :else (->> (string/join "\n" strings)
+                 (ex/sh "echo" "-e")
+                 :out
+                 (invoke-rofi-or-dmenu)
+                 :out
+                 (string/trim-newline)
+                 (if-empty-then-nil)))))
 
 (defn ensure-directory-exists [path]
   (if-not (fs/exists? path)
@@ -65,7 +64,6 @@
     (ensure-file-exists config-file)
     config-file))
 
-
 (defn current-stack-trace []
   (.getStackTrace (Thread/currentThread)))
 
@@ -75,7 +73,6 @@
 
 (defn is-in-repl? []
   (some is-repl-stack-element (current-stack-trace)))
-
 
 (defmacro if-let*
   "Multiple binding version of if-let"
@@ -92,8 +89,7 @@
      then)))
 
 (defn pgrep [expr]
-  (= 0 (:exit (ex/sh "pgrep" expr )))
-  )
+  (= 0 (:exit (ex/sh "pgrep" expr))))
 (defn vector-contains?
   "Runs .contains on a clojure.lang.Persistentvector annotating it to avoid a reflection warning"
   [^clojure.lang.PersistentVector v value]
@@ -102,13 +98,12 @@
 (defn checksum-file [path]
   (adler32-file path))
 
-
-(defn save-configuration 
+(defn save-configuration
   "Save options like keep library path and desired reader to a configuation file so that they
    may be omitted in the future. Obviously the save key shouldnt itself be saved."
   [options]
   (spit (get-configuration-file-path "settings") (select-keys options [:keep :preferred])))
-(save-configuration {:fuck "you" :save true})
+
 (defn get-saved-configuration []
   "If saved settings don't exist return an empty map."
   (let [contents (slurp (get-configuration-file-path "settings"))]
