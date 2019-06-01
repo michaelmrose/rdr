@@ -22,7 +22,7 @@
   -o [file]     => open with default reader and record in recent reads if part of a calibre library
   a query here  => same as -q a query here")
 
-
+(def answer 42)
 
 (defn return-ebook-reader-command
   "Read the type of file found at books path or paths and then compare it to a map from user configuration to    
@@ -39,7 +39,7 @@
   [book]
   (if-let* [recent-config-file (get-configuration-file-path "recent")
             current (map read-string (string/split-lines (slurp recent-config-file)))
-            combined (take (:keep opts) (distinct-by :id  (flatten [book current])))]
+            combined (take (:keep opts) (distinct-by #(select-keys % [:id :library])  (flatten [book current])))]
            (spit recent-config-file (string/join "\n" combined))
            (println "saving to recent list")))
 
@@ -50,14 +50,14 @@
   "Pass book to save-book-to-recent-reads
    then open the most preferred format with the preferred reader defined by -p and -r or configuration"
   [book]
-  (let [fixed (calibre/correct-ebook-metadata-if-database-changed book)
+  (let [fixed (calibre/correct-ebook-metadata-if-database-changed book opts)
         command (return-ebook-reader-command fixed)
         preferred (calibre/select-preferred-ebook-format fixed (:preferred opts))]
     (future (save-book-to-recent-reads fixed))
     (future (ex/sh command preferred))))
 
 (defn open-ebook-file [file]
-  (if-let [book (calibre/filename-to-metadata file)]
+  (if-let [book (calibre/filename-to-metadata file opts)]
     (open-ebook book)
     (ex/sh (return-ebook-reader-command file) file)))
 (defn print-book-details [book] (let [title (:title book)
@@ -90,16 +90,18 @@
   (println help-text))
 
 (defn query-and-open [query]
-  (if-let* [res (calibre/query-string-to-vector-of-maps query) sel (select-from-books-by-title res)]
+  (if-let* [res (calibre/query-string-to-vector-of-maps query opts) sel (select-from-books-by-title res)]
            (open-ebook sel)))
 
 (defn print-results-of-query [query]
   (doall (map println (map #(str (:title %) " by " (:authors %))
-                           (calibre/query-string-to-vector-of-maps query)))))
+                           (calibre/query-string-to-vector-of-maps query opts)))))
 
 (def cli-options
   [["-h" "--help"]
    ["-l" "--last"]
+   ["-L" "--library PATH"
+    :parse-fn ensure-path-string-ends-in-slash]
    ["-r" "--recent"]
    ["-q" "--query"]
    ["-o" "--open"]
