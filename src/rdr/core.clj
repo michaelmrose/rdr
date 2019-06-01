@@ -118,8 +118,7 @@
 
 (def default-options
   {:keep 30
-   :preferred [".pdf" ".epub" ".mobi"]
-   :reader {:default "xdg-open"}})
+   :preferred [".pdf" ".epub" ".mobi"] :reader {:default "xdg-open"}})
 
 (defn -main
   "Parse arguments and decide what action to take."
