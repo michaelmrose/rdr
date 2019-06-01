@@ -113,6 +113,11 @@
 
 ;; from  https://github.com/weavejester/medley/blob/master/src/medley/core.cljc
 ;; check to see if I ought to just require this library
+
+(defn ensure-path-string-ends-in-slash [s]
+  (if (string/ends-with? s "/")
+    s (str s "/")))
+
 (defn distinct-by
   "Returns a lazy sequence of the elements of coll, removing any elements that
   return duplicate values when passed to a function f."
@@ -139,3 +144,6 @@
                           (cons x (step (rest s) (conj seen fx)))))))
                   xs seen)))]
      (step coll #{}))))
+
+(defn notify [message]
+  (ex/sh "notify-send" "-t" "5000" message))
