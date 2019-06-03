@@ -10,6 +10,8 @@
 
 (set! *warn-on-reflection* true)
 
+(declare calibre-running?)
+
 (defn get-library-path [options]
   (let [calibre-config (str (System/getenv "HOME") "/.config/calibre/global.py.json")
         active (str (get (json/read-str (slurp calibre-config)) "library_path") "/")
