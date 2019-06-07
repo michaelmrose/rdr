@@ -7,10 +7,8 @@
    [clojure.tools.cli :as cli])
   (:gen-class)
   (:refer-clojure))
-
 (set! *warn-on-reflection* true)
 (declare opts)
-
 (def help-text
   "Usage:
   -p [list]     => list of formats in order of preference eg pdf,epub,mobi
@@ -21,8 +19,6 @@
   -l            => open the last book read
   -o [file]     => open with default reader and record in recent reads if part of a calibre library
   a query here  => same as -q a query here")
-
-(def answer 42)
 
 (defn return-ebook-reader-command
   "Read the type of file found at books path or paths and then compare it to a map from user configuration to    
@@ -40,8 +36,8 @@
   (if-let* [recent-config-file (get-configuration-file-path "recent")
             current (map read-string (string/split-lines (slurp recent-config-file)))
             combined (take (:keep opts) (distinct-by #(select-keys % [:id :library])  (flatten [book current])))]
-           (spit recent-config-file (string/join "\n" combined))
-           (println "saving to recent list")))
+    (spit recent-config-file (string/join "\n" combined))
+    (println "saving to recent list")))
 
 ;;TODO this opens the file with xdg-open open rather than depending on an expressed preference in reader
 ;; This means it can't be set as the default handler else you would see an infinite series of invocations instead of
@@ -60,6 +56,7 @@
   (if-let [book (calibre/filename-to-metadata file opts)]
     (open-ebook book)
     (ex/sh (return-ebook-reader-command file) file)))
+
 (defn print-book-details [book] (let [title (:title book)
                                       authors (:authors book)]
                                   (str title " by " authors)))
