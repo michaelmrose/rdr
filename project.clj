@@ -13,4 +13,5 @@
   :main rdr.core
   :target-path "target/%s"
   :aot :all
-  :profiles {:uberjar {:aot :all}})
+  :profiles {:uberjar {:jvm-opts ["-Dclojure.compiler.direct-linking=true"]
+                       :aot :all}})
