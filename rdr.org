@@ -235,7 +235,7 @@ This would be accomplished by discovering if the text prior to the first colon m
 ;; TODO: you CAN pass a particular library to calibredb when its active you just need a different syntax
 ;; example: calibredb list --fields=title,authors -s 'title:lambda' --with-library=http://localhost:8080/#testlibrary
 ;; I need to rework how it figures out the active library in terms of this but am too tired now
-;; in calibre namespace look at query-string-to-vector-of-maps and get-library-path
+;; in calibre namespace look at query-string-to-vector-of-maps and get-library-path!
 
   ;; :profiles {:uberjar {:jvm-opts ["-Dclojure.compiler.direct-linking=true"]
   ;;                      :aot :all}}

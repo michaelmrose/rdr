@@ -12,7 +12,16 @@
 
 (declare calibre-running?)
 
-(defn get-library-path [options]
+
+;; TODO: Make fetching a different library than the active one feasible when calibre is running.
+;; Its entirely possible to specify a library here when talking to a remote calibre instance its just a matter
+;; of passing an id not a path. Maybe instead of reading some py file it would be better to MAKE the user pass in a path
+;; or id. Can we derive the id from the path? I think it will always be the last part of the path string.  What if the users library
+;; is always a remote library running on a different system? Does it make sense to eventually support that? How should that be specified?
+;; In that case should we fetch the book from the remote library then open? Should such files be cached in case they are fetched repeatedly?
+
+
+(defn get-library-path! [options]
   (let [calibre-config (str (System/getenv "HOME") "/.config/calibre/global.py.json")
         active (str (get (json/read-str (slurp calibre-config)) "library_path") "/")
         from-options (:library options)]
@@ -34,7 +43,7 @@
 
 (defn id-to-formats [id options]
   "Given an id return formats vector containing paths to books matching id."
-  (->> (:out (ex/sh "sh" "-c" (str "ls " (get-library-path options) "*/*\\(" id  "\\)/*")))
+  (->> (:out (ex/sh "sh" "-c" (str "ls " (get-library-path! options) "*/*\\(" id  "\\)/*")))
        (string/split-lines)
        ;;need to avoid listing cover files or calibre metadata which appears to be .opf
        ;;I think any image files are always converted to jpg. Hopefully this is consistent.
@@ -47,12 +56,12 @@
   "Use id-to-formats to fix an ebook maps formats vectors which given a remote query will
    contain the format type instead of the actual local path of the file required."
   (merge book {:formats (id-to-formats (:id book) options)
-               :library (get-library-path options)}))
+               :library (get-library-path! options)}))
 
 (defn filename-to-id-string [f options]
   "Given a predictable path this will return the id of a book or nil if the book isn't in the calibre
    libraries path."
-  (let [book-in-library-pattern (re-pattern (str (get-library-path options) ".+/.+\\(([0-9]+)\\)/.+.{1,9}$"))]
+  (let [book-in-library-pattern (re-pattern (str (get-library-path! options) ".+/.+\\(([0-9]+)\\)/.+.{1,9}$"))]
     (if-let [id (second (re-matches book-in-library-pattern f))]
       id)))
 
@@ -60,7 +69,7 @@
   (pgrep "GUIPool|calibre"))
 
 (defn db-changed-since-last-visit? [options]
-  (let [db (str (get-library-path options) "metadata.db")
+  (let [db (str (get-library-path! options) "metadata.db")
         checksum (checksum-file db)
         checksum-file (get-configuration-file-path (str "checksum" (string/replace (string/replace db "/" "-") ".db" ".sum")))
         oldsum (slurp checksum-file)]
