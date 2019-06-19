@@ -50,7 +50,7 @@
 
 (defn list-recent-reads! []
   (let [recent (get-configuration-file-path "recent")]
-    (map read-string (string/split-lines (slurp recent)))))
+    (map read-string (filter not-empty (string/split-lines (slurp recent))))))
 
 (defn open-last-book
   "Open most recent entry from recent reads"
