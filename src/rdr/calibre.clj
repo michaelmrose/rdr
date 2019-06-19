@@ -17,6 +17,16 @@
         active (str (get (json/read-str (slurp calibre-config)) "library_path") "/")]
     (or (:library options) active)))
 
+(defn get-user-option [options]
+  (if-let [user (:user options)]
+    (str "--username=" user)
+    ""))
+
+(defn get-password-option [options]
+  (if-let [password (:password options)]
+    (str "--password=" password)
+    ""))
+
 (defn get-library-option [options]
   (let [path  (or (:library options) (get-library-path! options))]
     (if (calibre-running?)
@@ -75,8 +85,10 @@
    and returns a vector of maps."
   [query options]
   (let [library (get-library-option options)
+        user (get-user-option options)
+        pw (get-password-option options)
         fields "--fields=title,authors,formats"
-        query-vector ["calibredb" "list" fields  "-s" query "--for-machine" library]]
+        query-vector ["calibredb" user pw "list" fields  "-s" query "--for-machine" library]]
     (-<>
      (try
        (shelly query-vector)
