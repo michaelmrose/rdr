@@ -76,6 +76,7 @@
            (open-ebook! sel command)))
 
 (defn query-or-open [value select-fn command]
+  "If argument is a file open it otherwise treat it as a query."
   (if (fs/file? value)
     (open-ebook-file! value command)
     (query-and-open value select-fn command)))
