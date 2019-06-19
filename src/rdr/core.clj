@@ -40,9 +40,8 @@
   "Pass book to save-book-to-recent-reads!
    then open the most preferred format defined by -p anconfiguration"
   [book command]
-  (if-let* [fixed (calibre/correct-ebook-metadata-if-database-changed book opts)
-            preferred (calibre/select-preferred-ebook-format book opts)]
-           (do (future (save-book-to-recent-reads! fixed))
+  (if-let* [preferred (calibre/select-preferred-ebook-format book opts)]
+           (do (future (save-book-to-recent-reads! book))
                (:out (ex/sh command preferred)))))
 
 (defn open-ebook-file! [file command]
@@ -56,14 +55,17 @@
 (defn open-last-book
   "Open most recent entry from recent reads"
   [command]
-  (open-ebook! (first (list-recent-reads!)) command))
+  (if-let* [book (first (list-recent-reads!))
+            fixed (calibre/correct-ebook-metadata-if-database-changed book opts)]
+           (open-ebook! fixed command)))
 
 (defn pick-from-recent-reads
   "Read recent reads and use pick-from-selection to open"
   [select-fn command]
   (if-let* [recent (list-recent-reads!)
-            sel (select-by recent select-fn format-book-data)]
-           (open-ebook! sel command)))
+            sel (select-by recent select-fn format-book-data)
+            fixed (calibre/correct-ebook-metadata-if-database-changed sel opts)]
+           (open-ebook! fixed command)))
 
 (defn print-help "Print help info" []
   (println help-text))
