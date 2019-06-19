@@ -31,8 +31,7 @@
    where n is either 30 or the value defined by --keep"
   [book]
   (if-let* [recent-config-file (get-configuration-file-path "recent")
-            current (map read-string (string/split-lines (slurp recent-config-file)))
-            combined (take (:keep opts) (distinct-by #(select-keys % [:id :library])  (flatten [book current])))]
+            combined (take (:keep opts) (distinct-by #(select-keys % [:id :library])  (flatten [book (list-recent-reads!)])))]
            (spit recent-config-file (string/join "\n" combined))
            (println "saving to recent list")))
 
