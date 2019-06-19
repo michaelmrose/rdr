@@ -23,8 +23,15 @@
   -o [file]      => open with default reader and record in recent reads if part of a calibre library
   a query string => same as -q a query string")
 
+(defn print-help "Print help info" []
+  (println help-text))
+
 (defn format-book-data [book]
   (str (:title book) " by " (:authors book)))
+
+(defn list-recent-reads! []
+  (let [recent (get-configuration-file-path "recent")]
+    (map read-string (filter not-empty (string/split-lines (slurp recent))))))
 
 (defn save-book-to-recent-reads!
   "saves book info map to ~/.config/booksclj/recent.edn keeping only the most recent n entries 
@@ -47,10 +54,6 @@
   (if-let [book (calibre/filename-to-metadata file opts)]
     (open-ebook! book command) (ex/sh command file)))
 
-(defn list-recent-reads! []
-  (let [recent (get-configuration-file-path "recent")]
-    (map read-string (filter not-empty (string/split-lines (slurp recent))))))
-
 (defn open-last-book
   "Open most recent entry from recent reads"
   [command]
@@ -65,9 +68,6 @@
             sel (select-by recent select-fn format-book-data)
             fixed (calibre/correct-ebook-metadata-if-database-changed sel opts)]
            (open-ebook! fixed command)))
-
-(defn print-help "Print help info" []
-  (println help-text))
 
 (defn query-and-open [query select-fn command]
   (if-let* [res (calibre/query-string-to-vector-of-maps query opts)
