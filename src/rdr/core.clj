@@ -6,9 +6,7 @@
    [rdr.calibre :as calibre]
    [clojure.tools.cli :as cli]
    [me.raynes.fs :as fs])
-  (:gen-class)
-  ;; (:refer-clojure)
-)
+  (:gen-class))
 
 (set! *warn-on-reflection* true)
 
@@ -52,7 +50,7 @@
 
     --password PASSWORD
 
-    -S [options]   => save options to disk will not complete other operations. -S --port 8090 -q somequery will save but will not submit somequery to calibredb.
+    -S [options]   => save options passed to disk
 
     If you don't want to keep passing the above options consider running rdr -S option1 value option2 value to save said options then you may omit them from future invocations.
 
@@ -169,9 +167,9 @@
 
     (def opts (merge default-options (get-saved-configuration) (:options parsed)))
 
+    (if (:save opts) (save-configuration! opts))
     (cond
       (:help opts) (print-help)
-      (:save opts) (save-configuration! opts)
       (:recent opts) (pick-from-recent-reads rofi-select command)
       (:last opts) (open-last-book command)
       (:open opts) (open-ebook-file! arguments command)

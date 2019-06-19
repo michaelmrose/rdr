@@ -34,7 +34,7 @@ Download from releases. Building requires oracles new AOT compiler for jvm based
 
   --password PASSWORD"
   
-  -S [options]   => save options to disk will not complete other operations. -S --port 8090 -q somequery will save but will not submit somequery to calibredb.
+  -S [options]   => save options passed to disk
   
   If you don't want to keep passing the above options consider running rdr -S option1 value option2 value to save said options then you may omit them from future invocations.
 
