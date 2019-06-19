@@ -151,4 +151,10 @@
             choice (select-fn strings)
             ndx (.indexOf strings choice)
             res (nth coll ndx)]
-    res))
+           res))
+
+(defn shelly [commands]
+  (let [res (apply ex/sh commands)]
+    (if (= 0 (:exit res))
+      (:out res)
+      (throw (ex-info (str "Shell Command Failed: " (:err res)) {:type :shell :cause (first commands)})))))
