@@ -77,9 +77,17 @@
   (let [library (get-library-option options)
         fields "--fields=title,authors,formats"
         query-vector ["calibredb" "list" fields  "-s" query "--for-machine" library]]
-    (-<> (:out (apply ex/sh query-vector))
-         (json/read-str :key-fn keyword)
-         (mapv #(fix-book-formats % options) <>))))
+    (-<>
+     (try
+       (shelly query-vector)
+       (catch Exception e
+         "This is the string returned when the calibre content server is not running."
+         (if (string/includes? e "URLError: <urlopen error [Errno 111] Connection refused>")
+           (throw (ex-info "Connection to Calibre Content Server Refused Is It Running?" {:type :network}))
+           (throw e))))
+
+     (json/read-str :key-fn keyword)
+     (mapv #(fix-book-formats % options) <>))))
 
 (defn filename-to-metadata [f options]
   "Gets the id of a book based on the predictable path structure used by Calibre and searches the
