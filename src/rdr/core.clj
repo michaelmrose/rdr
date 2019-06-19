@@ -120,7 +120,7 @@
       (:open opts) (open-ebook-file! arguments command)
       (:query opts) (query-and-open arguments rofi-select command)
       (:print opts) (print-results-of-query arguments)
-      :else (query-or-open arguments rofi-select command)))
+      :else (query-and-open arguments rofi-select command)))
 
   ;; process takes several seconds to properly terminate if we don't exit manually
   ;; yet obviously we don't want to kill the repl every time we run test main
