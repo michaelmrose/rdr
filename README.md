@@ -10,15 +10,14 @@ Download from releases. Building requires oracles new AOT compiler for jvm based
 
 At present
 
--q [query] wherein query can be anything that calibre would accept. Searches library for items matching query narrowing down selection with rofi or dmenu and opens choice. This is intended to be with the reader of choice but at present it is hard coded to zathura.
-
--r chose from the 30 most recently read titles from calibre library. Please note that recent reads are recorded by the app not calibre.
-
--l open most recently opened book
-
--o [file] open file then record metadata from calibre in recent reads rdr -o is intended to be made the default reader for ebook files so that opening books properly records them in recent reads
-
-See rdr.org for coming development.
+-p [list]      => list of formats in order of preference eg pdf,epub,mobi
+-S [options]   => save options to disk
+-k [number]    => number of recent reads to keep
+-q [query]     => pass query with the same syntax as calibredb or calibregui accepts
+-r             => filter the most recent 30 distinct books opened via rdr via rofi or dmenu
+-l             => open the last book read
+-o [file]      => open with default reader and record in recent reads if part of a calibre library
+a query string => same as -q a query string"
 
 ## Options
 

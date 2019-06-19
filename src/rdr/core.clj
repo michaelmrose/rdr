@@ -21,7 +21,7 @@
   -r             => filter the most recent 30 distinct books opened via rdr via rofi or dmenu
   -l             => open the last book read
   -o [file]      => open with default reader and record in recent reads if part of a calibre library
-  a query string => same as -q a query here")
+  a query string => same as -q a query string")
 
 (defn format-book-data [book]
   (str (:title book) " by " (:authors book)))
