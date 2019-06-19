@@ -11,24 +11,8 @@
 )
 
 (set! *warn-on-reflection* true)
+
 (declare opts)
-(def help-text
-  "Usage:
-  -p [list]      => list of formats in order of preference eg pdf,epub,mobi
-  -S [options]   => save options to disk
-  -k [number]    => number of recent reads to keep
-  -q [query]     => pass query with the same syntax as calibredb or calibregui accepts
-  -r             => filter the most recent 30 distinct books opened via rdr via rofi or dmenu
-  -l             => open the last book read
-  -o [file]      => open with default reader and record in recent reads if part of a calibre library
-  a query string => same as -q a query string
-  Please note that calibres content server must be running for this program to work while calibre is running as it must communicate with them
-  content server process instead of directly using calibredb to examine the database. If neccesary please specify the server,port,username,and password.
-  The default is http://localhost:8080 with no password
-  --port PORT
-  --server URL
-  --user USER
-  --password PASSWORD")
 
 (def help-text
   "
