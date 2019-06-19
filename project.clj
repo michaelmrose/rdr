@@ -11,6 +11,7 @@
                  [me.raynes/fs "1.4.6"]
                  [org.clojure/tools.cli "0.4.2"]]
   :main rdr.core
+  :cljfmt {:indents {if-let* [[:block 1]]}}
   :target-path "target/%s"
   :aot :all
   :profiles {:uberjar {:jvm-opts ["-Dclojure.compiler.direct-linking=true"]

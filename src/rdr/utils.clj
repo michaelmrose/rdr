@@ -24,8 +24,6 @@
 (defn if-empty-then-nil [val]
   (if (empty? val) nil val))
 
-;;TODO make passing in the desired app a thing
-
 (defn binary-exists? [name]
   (= 0 (:exit (ex/sh "which" name))))
 
@@ -98,11 +96,11 @@
 (defn checksum-file [path]
   (adler32-file path))
 
-(defn save-configuration
+(defn save-configuration!
   "Save options like keep library path and desired reader to a configuation file so that they
    may be omitted in the future. Obviously the save key shouldnt itself be saved."
   [options]
-  (spit (get-configuration-file-path "settings") (select-keys options [:keep :preferred])))
+  (spit (get-configuration-file-path "settings") (select-keys options [:keep :preferred :library])))
 
 (defn get-saved-configuration []
   "If saved settings don't exist return an empty map."
@@ -147,3 +145,10 @@
 
 (defn notify [message]
   (ex/sh "notify-send" "-t" "5000" message))
+
+(defn select-by [coll select-fn format-fn]
+  (if-let* [^clojure.lang.PersistentVector strings (mapv format-fn coll)
+            choice (select-fn strings)
+            ndx (.indexOf strings choice)
+            res (nth coll ndx)]
+    res))

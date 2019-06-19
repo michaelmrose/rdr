@@ -23,10 +23,14 @@
 
 (defn get-library-path! [options]
   (let [calibre-config (str (System/getenv "HOME") "/.config/calibre/global.py.json")
-        active (str (get (json/read-str (slurp calibre-config)) "library_path") "/")
-        from-options (:library options)]
-    (if (calibre-running?) active
-        (or from-options active))))
+        active (str (get (json/read-str (slurp calibre-config)) "library_path") "/")]
+    (or (:library options) active)))
+
+(defn get-library-option [options]
+  (let [path  (or (:library options) (get-library-path! options))]
+    (if (calibre-running?)
+      (str "--library=http://localhost:8080/#" (last (string/split path #"/")))
+      (str "--library=" path))))
 
 ;; Calibre wont allow local reading of the library metadata when gui app is open for_machine
 ;; reasons of consistency thus you must communicate with the process over an interface that
@@ -39,7 +43,6 @@
 ;; the the files path and all files will be after the final /.  Each dir will contain in
 ;; addition to the ebooks an image file for the cover which will always be a jpg and a
 ;; metadata file ending in opf. These must be filtered out.
-
 
 (defn id-to-formats [id options]
   "Given an id return formats vector containing paths to books matching id."
@@ -80,9 +83,7 @@
   "Formats a query to calibredb and collects and processes json results
    and returns a vector of maps."
   [query options]
-  (let [library (cond (calibre-running?) "--with-library=http://localhost:8080"
-                      (:library options) (str "--library=" (:library options))
-                      :else "")
+  (let [library (get-library-option options)
         fields "--fields=title,authors,formats"
         query-vector ["calibredb" "list" fields  "-s" query "--for-machine" library]]
     (-<> (:out (apply ex/sh query-vector))
@@ -93,17 +94,18 @@
   (let [id (filename-to-id-string (.getPath ^java.io.File (fs/absolute f)) options)]
     (first (query-string-to-vector-of-maps (str "id:" id) options))))
 
-(defn select-preferred-ebook-format [book preferred-formats]
-  "Given a book map and a vector of preferred formats in order of preference
-   select the most desired format available"
-  (if-let* [formats (:formats book)
-            ^clojure.lang.LazySeq available (map fs/extension formats)
-            preferred (first (filter #(.contains available %) preferred-formats))
-            desired (first (filter #(string/ends-with? % preferred) formats))]
-           desired
-           (first (:formats book))))
-
 (defn correct-ebook-metadata-if-database-changed [book options]
   (if-not (db-changed-since-last-visit? options)
     book
     (filename-to-metadata (first (:formats book)) options)))
+
+(defn select-preferred-ebook-format [book options]
+  "Given a book map and a vector of preferred formats in order of preference
+   select the most desired format available"
+  (if-let* [formats (:formats book)
+            ^clojure.lang.LazySeq available (map fs/extension formats)
+            preferred (first (filter #(.contains available %) (:preferred options)))
+            desired (first (filter #(string/ends-with? % preferred) formats))]
+           desired
+           (first (:formats book))))
+
