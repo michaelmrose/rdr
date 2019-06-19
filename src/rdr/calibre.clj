@@ -111,4 +111,3 @@
             desired (first (filter #(string/ends-with? % preferred) formats))]
            desired
            (first (:formats book))))
-
