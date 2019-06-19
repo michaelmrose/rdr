@@ -42,7 +42,7 @@
   [book command]
   (if-let* [preferred (calibre/select-preferred-ebook-format book opts)]
            (do (future (save-book-to-recent-reads! book))
-               (:out (ex/sh command preferred)))))
+               (future (:out (ex/sh command preferred))))))
 
 (defn open-ebook-file! [file command]
   (if-let [book (calibre/filename-to-metadata file opts)]
