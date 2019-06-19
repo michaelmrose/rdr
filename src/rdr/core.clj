@@ -21,7 +21,14 @@
   -r             => filter the most recent 30 distinct books opened via rdr via rofi or dmenu
   -l             => open the last book read
   -o [file]      => open with default reader and record in recent reads if part of a calibre library
-  a query string => same as -q a query string")
+  a query string => same as -q a query string
+  Please note that calibres content server must be running for this program to work while calibre is running as it must communicate with them
+  content server process instead of directly using calibredb to examine the database. If neccesary please specify the server,port,username,and password.
+  The default is http://localhost:8080 with no password
+  --port PORT
+  --server URL
+  --user USER
+  --password PASSWORD")
 
 (defn print-help "Print help info" []
   (println help-text))
@@ -44,7 +51,7 @@
 
 (defn open-ebook!
   "Pass book to save-book-to-recent-reads!
-   then open the most preferred format defined by -p anconfiguration"
+   then open the most preferred format defined by -p configuration"
   [book command]
   (if-let* [preferred (calibre/select-preferred-ebook-format book opts)]
            (do (future (save-book-to-recent-reads! book))
@@ -95,12 +102,18 @@
    ["-k" "--keep NUMBER"]
    ["-p" "--preferred FORMATS"
     :parse-fn #(string/split % #",")]
-   ["-P" "--print"]
+   [nil "--print"]
+   [nil "--port PORT"]
+   [nil "--server URL"]
+   [nil "--user USER"]
+   [nil "--password PASSWORD"]
    ["-S" "--save"]])
 
 (def default-options
   {:keep 30
-   :preferred [".pdf" ".epub" ".mobi"]})
+   :preferred [".pdf" ".epub" ".mobi"]
+   :server "http://localhost"
+   :port 8080})
 
 (defn -main
   "Parse arguments and decide what action to take."

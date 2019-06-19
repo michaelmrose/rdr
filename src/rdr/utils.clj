@@ -100,7 +100,7 @@
   "Save options like keep library path and desired reader to a configuation file so that they
    may be omitted in the future. Obviously the save key shouldnt itself be saved."
   [options]
-  (spit (get-configuration-file-path "settings") (select-keys options [:keep :preferred :library])))
+  (spit (get-configuration-file-path "settings") (select-keys options [:keep :preferred :library :port :password :user :server])))
 
 (defn get-saved-configuration []
   "If saved settings don't exist return an empty map."

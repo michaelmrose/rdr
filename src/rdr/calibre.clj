@@ -20,7 +20,7 @@
 (defn get-library-option [options]
   (let [path  (or (:library options) (get-library-path! options))]
     (if (calibre-running?)
-      (str "--library=http://localhost:8080/#" (last (string/split path #"/")))
+      (str "--library=" (:server options) ":" (:port options) "#" (last (string/split path #"/")))
       (str "--library=" path))))
 
 ;; Calibre wont allow local reading of the library metadata when gui app is open for_machine
