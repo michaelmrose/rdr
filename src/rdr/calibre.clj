@@ -12,15 +12,6 @@
 
 (declare calibre-running?)
 
-
-;; TODO: Make fetching a different library than the active one feasible when calibre is running.
-;; Its entirely possible to specify a library here when talking to a remote calibre instance its just a matter
-;; of passing an id not a path. Maybe instead of reading some py file it would be better to MAKE the user pass in a path
-;; or id. Can we derive the id from the path? I think it will always be the last part of the path string.  What if the users library
-;; is always a remote library running on a different system? Does it make sense to eventually support that? How should that be specified?
-;; In that case should we fetch the book from the remote library then open? Should such files be cached in case they are fetched repeatedly?
-
-
 (defn get-library-path! [options]
   (let [calibre-config (str (System/getenv "HOME") "/.config/calibre/global.py.json")
         active (str (get (json/read-str (slurp calibre-config)) "library_path") "/")]
@@ -91,10 +82,14 @@
          (mapv #(fix-book-formats % options) <>))))
 
 (defn filename-to-metadata [f options]
+  "Gets the id of a book based on the predictable path structure used by Calibre and searches the
+   metadata associated with that id."
   (let [id (filename-to-id-string (.getPath ^java.io.File (fs/absolute f)) options)]
     (first (query-string-to-vector-of-maps (str "id:" id) options))))
 
 (defn correct-ebook-metadata-if-database-changed [book options]
+  "If the db has been updated since last visit update metadata. Needed because book metadata
+   may be read from the recent file instead of directly from Calibre."
   (if-not (db-changed-since-last-visit? options)
     book
     (filename-to-metadata (first (:formats book)) options)))
