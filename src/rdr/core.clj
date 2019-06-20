@@ -13,65 +13,70 @@
 (declare opts)
 
 (def help-text
-  "• rdr
+  "
+  • rdr
 
     A handy cli interface to searching and opening books from your calibre library or recently read titles from your library.
 
-    • Installation
+  • Installation
 
-        Download from releases. Building requires oracles new AOT compiler for jvm based languages [graal](http://www.graalvm.org) Be advised that it is extremely memory hungry.
+    Download binaries from releases. Building from source requires oracles new AOT compiler for jvm based languages [graal](http://www.graalvm.org) Be advised that it is extremely memory hungry.
 
-    • Usage
+  • Usage
 
-        • Actions
+    • Actions
 
-            -q [query]     => pass query with the same syntax as calibredb or calibregui accepts
+        -q [query]     => pass query with the same syntax as calibredb or calibregui accepts
 
-            -l             => open the last book read
+        -l             => open the last book read
 
-            -r             => filter the most recent 30 distinct books opened via rdr via rofi or dmenu
+        -r             => filter the most recent 30 distinct books opened via rdr via rofi or dmenu
 
-            a query string => same as -q a query string
+        query string   => If a string is passed in without -q -h -l -r specified it is treated as a query
 
-            -o [file]      => open with default reader and record in recent reads if part of a calibre library
+        -o [file]      => open with default reader and record in recent reads if part of a calibre library
 
-        • Options
+        -S [options]   => save options passed to disk
 
-            -p [list]      => list of formats in order of preference eg pdf,epub,mobi
+    • Options
 
-            -k [number]    => number of recent reads to keep
+        -p [list]      => list of formats in order of preference eg pdf,epub,mobi
 
-            --port PORT
+        -k [number]    => number of recent reads to keep
 
-            --server URL
+        --port PORT
 
-            --user USER
+        --server URL
 
-            --password PASSWORD
+        --user USER
 
-            -S [options]   => save options passed to disk
+        --password PASSWORD
 
-            If you don't want to keep passing the above options consider running rdr -S option1 value option2 value to save said options then you may omit them from future invocations.
+        The recommended usage is to pass the desired defaults with -S then omit them on future invocations.
+        Example:
 
-    • Please Note
+        rdr -S -L /path/to/library -p pdf,epub,mobi -k 10 -p 8090 --user me --password hunter2
 
-    Please note that calibres content server must be running for this program to work while calibre is running as it must communicate with the
-    content server process instead of directly using calibredb to examine the database. If neccesary please specify the server,port,username,and password.
-    The default is http://localhost:8080 with no password
+        then 
 
-    • Example
+        rdr -q query string here
+
+  • Please Note
+
+    If you expect this program to work while Calibre's gui is running you must enable Calibre's content server and pass in login parameters if applicable. The content server is disabled by default. You can enable it in Calibre's preferences menu. By default it will serve from localhost on port 8080 which is also the default for this program. If you haven't changed these parameters it is sufficient to simply enable the server. The reason for this limitation is technical. As this application wraps calibredb it inherits its limitations. When Calibre is running it can't access the database directly as both the Calibre UI and calibredb could in theory modify the database thus it can only work if it is able to communicate with the running Calibre content server.
+
+  • Example
 
     example video https://www.youtube.com/watch?v=RuWe0uhzrXE&
 
-    • Limitations
+  • Limitations
+    Rdr doesn't actually support remote calibre servers yet as it presently just uses this feature to work around the fact that calibredb wont work locally without talking to the calibre content server.  It could probably be trivially expanded to fetch and then display remote books in the future.
 
-    Rdr doesn't actually support remote calibre servers yet as it presently just uses this feature to work around the fact that calibredb wont work locally without talking to the
-    calibre content server.  It could probably be trivially expanded to fetch and then display remote books in the future.
-
-    • License
+  • License
 
     GPL 3.0 or later.
     Copyright © 2019 Michael Rose
+
   ")
 
 (defn print-help "Print help info" []

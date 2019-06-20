@@ -4,7 +4,7 @@ A handy cli interface to searching and opening books from your calibre library o
 
 ## Installation
 
-Download from releases. Building requires oracles new AOT compiler for jvm based languages [graal](http://www.graalvm.org) Be advised that it is extremely memory hungry.
+Download binaries from releases. Building from source requires oracles new AOT compiler for jvm based languages [graal](http://www.graalvm.org) Be advised that it is extremely memory hungry.
 
 ## Usage
 
@@ -16,9 +16,11 @@ Download from releases. Building requires oracles new AOT compiler for jvm based
 
   -r             => filter the most recent 30 distinct books opened via rdr via rofi or dmenu
 
-  a query string => same as -q a query string
+  query string   => If a string is passed in without -q -h -l -r specified it is treated as a query
 
   -o [file]      => open with default reader and record in recent reads if part of a calibre library
+
+  -S [options]   => save options passed to disk
   
 ### Options
 
@@ -34,15 +36,18 @@ Download from releases. Building requires oracles new AOT compiler for jvm based
 
   --password PASSWORD"
   
-  -S [options]   => save options passed to disk
+  The recommended usage is to pass the desired defaults with -S then omit them on future invocations.
+  Example:
   
-  If you don't want to keep passing the above options consider running rdr -S option1 value option2 value to save said options then you may omit them from future invocations.
+  rdr -S -L /path/to/library -p pdf,epub,mobi -k 10 -p 8090 --user me --password hunter2
+  
+  then 
+  
+  rdr -q query string here
 
 ## Please Note
 
-  Please note that calibres content server must be running for this program to work while calibre is running as it must communicate with the
-  content server process instead of directly using calibredb to examine the database. If neccesary please specify the server,port,username,and password.
-  The default is http://localhost:8080 with no password
+  If you expect this program to work while Calibre's gui is running you must enable Calibre's content server and pass in login parameters if applicable. The content server is disabled by default. You can enable it in Calibre's preferences menu. By default it will serve from localhost on port 8080 which is also the default for this program. If you haven't changed these parameters it is sufficient to simply enable the server. The reason for this limitation is technical. As this application wraps calibredb it inherits its limitations. When Calibre is running it can't access the database directly as both the Calibre UI and calibredb could in theory modify the database thus it can only work if it is able to communicate with the running Calibre content server.
 
 ## Example
 
