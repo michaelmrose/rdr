@@ -80,15 +80,34 @@
     (spit checksum-file checksum)
     (not= checksum oldsum)))
 
+(defn format-query
+  "Calibre specifies criteria for queries like so criteria:value with the value potentially proceeding over multiple space separated words
+  and terminated on end of string or the next criteria. If we pass in a query with criteria defined pass it to calibre unchanged. If we receive
+  a plain string we will return a modified query string which will serve to return a more natural result. Calibre by default searches all fields
+  including an oft voluminous comment field which can contain multiple paragraphs of text. For example if an author is compared in comments text
+  to William Shakespeare that book will be returned in a plain search for the text Shakespeare. This is rarely desired. Instead for a plain query
+  we will return only those books wherein every word was contained in either authors titles or tags. The resulting query which is hard to reproduce in a comment is simply
+  as depicted in any-of below surrounded by parens and joined by and."
+
+  [query-string]
+  (letfn [(any-of [s] (str "(" "authors:" s  " or " "title:" s " or " "tags:" s ")"))]
+    (if (string/includes? query-string ":")
+      query-string
+      (->> (string/split query-string #" ")
+           (map #(any-of %))
+           (interpose "and")
+           (string/join " ")))))
+
 (defn query-string-to-vector-of-maps
   "Formats a query to calibredb and collects and processes json results
    and returns a vector of maps."
   [query options]
-  (let [library (get-library-option options)
+  (let [formatted-query (format-query query)
+        library (get-library-option options)
         user (get-user-option options)
         pw (get-password-option options)
         fields "--fields=title,authors,formats"
-        query-vector ["calibredb" user pw "list" fields  "-s" query "--for-machine" library]]
+        query-vector ["calibredb" user pw "list" fields  "-s" formatted-query "--for-machine" library]]
     (-<>
      (try
        (shelly query-vector)
