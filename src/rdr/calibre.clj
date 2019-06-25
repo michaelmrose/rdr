@@ -142,3 +142,9 @@
             desired (first (filter #(string/ends-with? % preferred) formats))]
            desired
            (first (:formats book))))
+
+;; TODO: I'd like to make the search interface more friendly in order to do this I am going to enhance the query functionality
+;; - replace tag and author with tags and authors in criteria so either may be input
+;; - look into searching for multiple forms of words and plurals
+;; - for words that aren't found look into looking for similar words in titles/tags/authors to return a correct intended answer
+;    where otherwise none was found. I should look into https://yomguithereal.github.io/clj-fuzzy/clojure.html
