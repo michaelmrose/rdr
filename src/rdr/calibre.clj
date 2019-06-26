@@ -98,11 +98,17 @@
            (interpose "and")
            (string/join " ")))))
 
+(defn fix-query [query]
+  "Let you use tag or author in place of tags and authors"
+  (-> query
+      (string/replace "tag:" "tags:")
+      (string/replace "author:" "authors:")))
+
 (defn query-string-to-vector-of-maps
   "Formats a query to calibredb and collects and processes json results
    and returns a vector of maps."
   [query options]
-  (let [formatted-query (format-query query)
+  (let [formatted-query (fix-query (format-query query))
         library (get-library-option options)
         user (get-user-option options)
         pw (get-password-option options)
@@ -147,4 +153,4 @@
 ;; - replace tag and author with tags and authors in criteria so either may be input
 ;; - look into searching for multiple forms of words and plurals
 ;; - for words that aren't found look into looking for similar words in titles/tags/authors to return a correct intended answer
-;    where otherwise none was found. I should look into https://yomguithereal.github.io/clj-fuzzy/clojure.html
+;;    where otherwise none was found. I should look into https://yomguithereal.github.io/clj-fuzzy/clojure.html
