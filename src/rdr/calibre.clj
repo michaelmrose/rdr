@@ -81,13 +81,7 @@
     (not= checksum oldsum)))
 
 (defn format-query
-  "Calibre specifies criteria for queries like so criteria:value with the value potentially proceeding over multiple space separated words
-  and terminated on end of string or the next criteria. If we pass in a query with criteria defined pass it to calibre unchanged. If we receive
-  a plain string we will return a modified query string which will serve to return a more natural result. Calibre by default searches all fields
-  including an oft voluminous comment field which can contain multiple paragraphs of text. For example if an author is compared in comments text
-  to William Shakespeare that book will be returned in a plain search for the text Shakespeare. This is rarely desired. Instead for a plain query
-  we will return only those books wherein every word was contained in either authors titles or tags. The resulting query which is hard to reproduce in a comment is simply
-  as depicted in any-of below surrounded by parens and joined by and."
+  "Calibre specifies criteria for queries like so criteria:value with the value potentially proceeding over multiple space separated words and terminated on end of string or the next criteria. If we pass in a query with criteria defined pass it to calibre unchanged. If we receive a plain string we will return a modified query string which will serve to return a more natural result. Calibre by default searches all fields including an oft voluminous comment field which can contain multiple paragraphs of text. For example if an author is compared in comments text to William Shakespeare that book will be returned in a plain search for the text Shakespeare. This is rarely desired. Instead for a plain query we will return only those books wherein every word was contained in either authors titles or tags. The resulting query which is hard to reproduce in a comment is simply as depicted in any-of below surrounded by parens and joined by and."
 
   [query-string]
   (letfn [(any-of [s] (str "(" "authors:" s  " or " "title:" s " or " "tags:" s ")"))]
