@@ -6,6 +6,8 @@ A handy cli interface to searching and opening books from your calibre library o
 
 Download binaries from releases. Building from source requires oracles new AOT compiler for jvm based languages [graal](http://www.graalvm.org) Be advised that it is extremely memory hungry.
 
+To build from source run lein native-image and copy the portable rdr executable to a location in path. Running make build will build with ionice to avoid dragging down the system and place the executable in ~/bin
+
 ## Usage
 
 ### Actions
