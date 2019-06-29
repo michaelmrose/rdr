@@ -3,6 +3,7 @@
   :url "none"
   :license {:name "GPL-3.0-or-later"
             :url "https://www.gnu.org/licenses/gpl-3.0"}
+  :plugins [[io.taylorwood/lein-native-image "0.3.0"]]
   :dependencies [[org.clojure/clojure "1.9.0"]
                  [com.rpl/specter "1.1.2"]
                  [swiss-arrows "1.0.0"]
@@ -12,7 +13,12 @@
                  [org.clojure/tools.cli "0.4.2"]]
   :main rdr.core
   :cljfmt {:indents {if-let* [[:block 1]]}}
-  :target-path "target/%s"
+  :target-path "target/"
   :aot :all
-  :profiles {:uberjar {:jvm-opts ["-Dclojure.compiler.direct-linking=true"]
-                       :aot :all}})
+  :native-image {:name     "rdr"
+                 :jvm-opts ["-Dclojure.compiler.direct-linking=true"]
+                 :opts     ["--report-unsupported-elements-at-runtime"
+                            "--initialize-at-build-time"
+                            "--allow-incomplete-classpath"
+                            "-Dgraal.CompilerConfiguration=economy"
+                            "--no-server"]})
