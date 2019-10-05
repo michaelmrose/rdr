@@ -1,6 +1,6 @@
 # rdr
 
-A handy cli interface to searching and opening books from your calibre library or recently read titles from your library.
+A handy cli interface to searching and opening books from your [calibre](https://calibre-ebook.com/) library or recently read titles from your library.
 
 ## Installation
 
