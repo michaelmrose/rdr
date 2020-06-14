@@ -10,15 +10,18 @@
                  [org.clojure/data.json "0.2.6"]
                  [pandect "0.5.0"]
                  [me.raynes/fs "1.4.6"]
+                 [hashp "0.1.1"]
                  [org.clojure/tools.cli "0.4.2"]]
   :main rdr.core
   :cljfmt {:indents {if-let* [[:block 1]]}}
   :target-path "target/"
   :aot :all
+  :jvm-opts ["-Xms100m" "-Xmx200m" "-server" "-XX:MaxHeapFreeRatio=70"]
   :native-image {:name     "rdr"
                  :jvm-opts ["-Dclojure.compiler.direct-linking=true"]
                  :opts     ["--report-unsupported-elements-at-runtime"
                             "--initialize-at-build-time"
                             "--allow-incomplete-classpath"
                             "-Dgraal.CompilerConfiguration=economy"
-                            "--no-server"]})
+                            "--no-server"]}
+  )

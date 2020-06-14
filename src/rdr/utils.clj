@@ -24,7 +24,8 @@
 (defn if-empty-then-nil [val]
   (if (empty? val) nil val))
 
-(defn binary-exists? [name]
+(defn binary-exists?
+  [name]
   (= 0 (:exit (ex/sh "which" name))))
 
 (defn invoke-rofi-or-dmenu [in]

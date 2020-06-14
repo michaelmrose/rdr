@@ -5,7 +5,8 @@
    [rdr.utils :refer :all]
    [rdr.calibre :as calibre]
    [clojure.tools.cli :as cli]
-   [me.raynes.fs :as fs])
+   [me.raynes.fs :as fs]
+   [hashp.core])
   (:gen-class))
 
 (set! *warn-on-reflection* true)
@@ -132,8 +133,9 @@
             sel (select-by res select-fn format-book-data)]
            (open-ebook! sel command)))
 
-(defn query-or-open [value select-fn command]
+(defn query-or-open
   "If argument is a file open it otherwise treat it as a query."
+  [value select-fn command]
   (if (fs/file? value)
     (open-ebook-file! value command)
     (query-and-open value select-fn command)))
@@ -141,6 +143,8 @@
 (defn print-results-of-query [query]
   (doall (map println (map format-book-data
                            (calibre/query-string-to-vector-of-maps query opts)))))
+(defn print-raw-result-data [query]
+  (doall (map println (calibre/query-string-to-vector-of-maps query opts))))
 
 (def cli-options
   [["-h" "--help"]
@@ -154,6 +158,7 @@
    ["-p" "--preferred FORMATS"
     :parse-fn #(string/split % #",")]
    [nil "--print"]
+   [nil "--printraw"]
    [nil "--port PORT"]
    [nil "--server URL"]
    [nil "--user USER"]
@@ -178,11 +183,12 @@
     (if (:save opts) (save-configuration! opts))
     (cond
       (:help opts) (print-help)
+      (:printraw opts)(print-raw-result-data arguments)
+      (:print opts) (print-results-of-query arguments)
       (:recent opts) (pick-from-recent-reads rofi-select command)
       (:last opts) (open-last-book command)
       (:open opts) (open-ebook-file! arguments command)
       (:query opts) (query-and-open arguments rofi-select command)
-      (:print opts) (print-results-of-query arguments)
       :else (query-and-open arguments rofi-select command)))
 
   ;; process takes several seconds to properly terminate if we don't exit manually
